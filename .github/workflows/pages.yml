@@ -1,0 +1,55 @@
+name: Publish restaurant website
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: restaurant-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import existing public restaurant files once
+        if: hashFiles('index.html') == ''
+        uses: actions/checkout@v4
+        with:
+          repository: vasquezfabricio49-cmyk/WEBS-de-prueba
+          ref: codex/asador-sensacion-cinematic
+          path: _source
+          persist-credentials: false
+          sparse-checkout: el-amanecer
+      - name: Save standalone restaurant website
+        if: hashFiles('index.html') == ''
+        run: |
+          test -f _source/el-amanecer/index.html
+          cp -a _source/el-amanecer/. .
+          node -e "const fs=require('fs');const path=require('path');const p=path.resolve('_source');if(!p.startsWith(process.env.GITHUB_WORKSPACE+path.sep))throw Error('Invalid import path');fs.rmSync(p,{recursive:true,force:true});"
+          printf 'bar-reselamanecer.com\n' > CNAME
+          touch .nojekyll
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Publish standalone El Amanecer website"
+          git push
+      - name: Prepare public site only
+        run: |
+          mkdir _site
+          find . -maxdepth 1 -type f ! -name 'README.md' ! -name 'INVENTARIO.md' ! -name 'PROCEDENCIA.json' -exec cp {} _site/ \;
+          cp -a images media downloads _site/
+          test -f _site/index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v4
