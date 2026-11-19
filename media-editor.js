@@ -15,4 +15,3 @@
  form.append(grid);const submit=document.createElement('button');submit.className='primary';submit.textContent='Guardar multimedia';submit.type='submit';form.append(submit);form.onsubmit=async e=>{e.preventDefault();try{const state=CMS.read()||{version:1,menu:await(await fetch('catalog.json',{cache:'no-store'})).json(),content:published};state.content={...state.content,media:clean(values)};await CMS.write(state);notify('Multimedia guardada en este navegador. Exporta el contenido para publicarlo en GitHub.')}catch(e){notify(e.message)}};document.querySelector('#content-form').after(form)}
  window.AmanecerMedia={fields,safe,clean,apply};if(document.querySelector('#content-form'))addEventListener('amanecer:panel-change',mount);else apply(CMS.read()?.content?.media);
 })();
-

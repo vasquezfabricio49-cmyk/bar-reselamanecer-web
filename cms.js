@@ -25,7 +25,7 @@
  };
  const loadPublished=async()=>{await window.AmanecerBackend?.ready;if(window.AmanecerBackend?.enabled){const site=await window.AmanecerBackend.loadSite();if(site)return site.content||{}}try{const r=await fetch('site-content.json',{cache:'no-store'});if(!r.ok)return {};const d=await r.json();return d?.version===1&&d.content&&typeof d.content==='object'?d.content:{}}catch{return {}}};
  const statuses=['pending','confirmed','rejected','cancelled'];
- const validBooking=b=>b&&typeof b.reference==='string'&&/^AMA-[A-Z0-9-]{1,60}$/.test(b.reference)&&typeof b.name==='string'&&b.name.trim().length>0&&b.name.length<=80&&typeof b.phone==='string'&&/^[+0-9 ()-]{7,24}$/.test(b.phone)&&b.phone.replace(/\D/g,'').length>=7&&/^\d{4}-\d{2}-\d{2}$/.test(b.date)&&/^\d{2}:\d{2}$/.test(b.time)&&Number.isInteger(b.people)&&b.people>=1&&b.people<=30&&statuses.includes(b.status);
+ const validBooking=b=>b&&typeof b.reference==='string'&&/^AMA-[A-Z0-9-]{1,60}$/.test(b.reference)&&typeof b.name==='string'&&b.name.trim().length>0&&b.name.length<=80&&typeof b.phone==='string'&&/^[+0-9 ()-]{7,24}$/.test(b.phone)&&b.phone.replace(/\D/g,'').length>=7&&/^\d{4}-\d{2}-\d{2}$/.test(b.date)&&/^\d{2}:\d{2}$/.test(b.time)&&Number.isInteger(b.people)&&b.people>=2&&b.people<=20&&statuses.includes(b.status);
  const readBookings=()=>{if(window.AmanecerBackend?.enabled)return window.AmanecerBackend.bookings;try{const rows=JSON.parse(localStorage.getItem(bookingKey));return Array.isArray(rows)?rows.filter(validBooking).slice(0,500):[]}catch{return []}};
  const writeBookings=rows=>{if(!Array.isArray(rows)||rows.length>500||!rows.every(validBooking))throw Error('Revisa los datos de la solicitud.');localStorage.setItem(bookingKey,JSON.stringify(rows));dispatchEvent(new Event('amanecer:bookings-change'))};
  const addBooking=data=>{const rows=readBookings(),booking={reference:'AMA-'+Date.now().toString(36).toUpperCase()+'-'+crypto.randomUUID().slice(0,4).toUpperCase(),name:String(data.name||'').trim(),phone:String(data.phone||'').trim(),date:data.date,time:data.time,people:Number(data.people),email:String(data.email||'').trim(),status:'pending'};if(!validBooking(booking))throw Error('Revisa el nombre, teléfono y los datos de la mesa.');writeBookings([booking,...rows]);return booking};
@@ -33,5 +33,4 @@
  window.SensacionCMS={key,bookingKey,image,valid,fields,loadPublished,read,write,apply,readBookings,addBooking,setBookingStatus};
  if(document.querySelector('#hero-title'))apply();
 })();
-
 

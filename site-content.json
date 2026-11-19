@@ -1,4 +1,13 @@
 {
   "version": 1,
-  "content": {}
+  "content": {
+    "dailyMenu": {
+      "enabled": false,
+      "title": "Menú del día",
+      "date": "",
+      "description": "",
+      "price": null,
+      "dishIds": []
+    }
+  }
 }

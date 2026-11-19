@@ -4,10 +4,10 @@
  const result=document.querySelector('#result'),submit=form.querySelector('[type=submit]');
  B.policyReady.then(()=>{if(!B.enabled)return;
   form.querySelector('.fine').textContent='Reserva tu mesa. Recibirás la confirmación y un enlace para gestionarla por correo.';
-  document.querySelector('#booking-mode').textContent='Antelación mínima: '+B.policy.minimumNoticeMinutes+' minutos. Duración de mesa: '+B.policy.mealDurationMinutes+' minutos. Grupos de 2 a 6 personas.';
+  document.querySelector('#booking-mode').textContent='Antelación mínima: '+B.policy.minimumNoticeMinutes+' minutos. Duración de mesa: '+B.policy.mealDurationMinutes+' minutos. Grupos de 2 a 20 personas.';
   if(!B.policy.enabled){submit.disabled=true;result.textContent='Las reservas online aún no están activadas. Contacta por teléfono.';return}
   form.elements.email.required=true;form.elements.email.parentElement.firstChild.textContent='Correo electrónico';form.elements.email.placeholder='Aquí recibirás tu confirmación';
-  form.elements.people.replaceChildren(...[2,3,4,5,6].map(n=>new Option(String(n),String(n))));
+  form.elements.people.replaceChildren(...Array.from({length:19},(_,i)=>i+2).map(n=>new Option(String(n),String(n))));
   const consent=form.querySelector('.consent span');consent.replaceChildren(document.createTextNode('He leído la información de privacidad y acepto recibir los avisos necesarios para gestionar mi reserva.'));
   const privacy=document.createElement('a');privacy.href='privacidad.html';privacy.textContent=' Información de privacidad';consent.append(privacy);
   document.querySelector('#reservas>div>p:not(.eyebrow)').textContent='Tu reserva se confirma automáticamente cuando hay una mesa disponible.';
@@ -25,11 +25,10 @@
    if(times.length!==1||!window.AmanecerBookingRules.meetsNotice(d.date,d.time))throw Error('NOTICE_REQUIRED');
    const payload={name:d.name.trim(),phone:d.phone.trim(),email:d.email.trim(),people:Number(d.people),start:new Date(times[0]).toISOString(),consent:true};
    const serialized=JSON.stringify(payload);if(lastPayload!==serialized){key=crypto.randomUUID();lastPayload=serialized}
-   submit.disabled=true;result.textContent='Comprobando tu mesa…';
+   if(payload.people>=10&&!B.policy.paymentsEnabled)throw Error('DEPOSIT_REQUIRED');submit.disabled=true;result.textContent='Comprobando tu mesa…';
    const response=await B.book({...payload,key,token});
    result.textContent='Reserva confirmada. Referencia: '+response.reservation.reservation_id+'. Los avisos por correo están preparados para su envío.';
    const note=document.createElement('p');note.textContent='Si el correo tarda, revisa spam. Conserva esta referencia.';result.append(note);form.reset();key='';lastPayload='';
   }catch(error){result.textContent=B.friendly(error)}finally{if(B.enabled){token='';submit.disabled=true;if(widget!==undefined)window.turnstile?.reset(widget)}}
  },true);
 })();
-

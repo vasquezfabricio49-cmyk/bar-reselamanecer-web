@@ -6,4 +6,3 @@
  form.onsubmit=async e=>{e.preventDefault();busy(true);try{const times=window.AmanecerBookingRules.candidates(form.elements.date.value,form.elements.time.value);if(times.length!==1)throw Error('INVALID_INPUT');const d=await request('change',{start:new Date(times[0]).toISOString(),people:Number(form.elements.people.value)});show(d.reservation);status.textContent='Cambio confirmado. Los avisos por correo están preparados para su envío.'}catch(e){status.textContent=B.friendly(e)}finally{busy(false)}};
  cancel.onclick=async()=>{if(!confirm('¿Quieres cancelar esta reserva y liberar la mesa?'))return;busy(true);try{const d=await request('cancel');show(d.reservation);status.textContent='Reserva cancelada. Los avisos por correo están preparados para su envío.'}catch(e){status.textContent=B.friendly(e)}finally{busy(false)}};
 })();
-

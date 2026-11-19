@@ -2,8 +2,8 @@
 (()=>{'use strict';
  const editor=location.pathname.endsWith('/editor.html');
  const B=window.AmanecerBackend={enabled:false,site:null,revision:0,bookings:[],token:'',config:null};
- const errors={REVISION_CONFLICT:'Otra persona ha guardado cambios. Recarga antes de editar.',NO_AVAILABILITY:'No queda una mesa para ese horario.',NOTICE_REQUIRED:'Reserva con al menos 2 horas de antelación.',OUTSIDE_OPENING_HOURS:'Ese horario no permite completar las 2 horas de mesa.',CONFIGURATION_REQUIRED:'Las reservas aún no están activadas.',INVALID_ACTION:'Esta reserva ya no admite ese cambio.',FORBIDDEN:'No tienes permiso para acceder.',BOT_CHECK_FAILED:'Repite la comprobación de seguridad.',TRY_LATER:'Demasiados intentos. Espera unos minutos.',INVALID_INPUT:'Revisa los datos del formulario.'};
- const friendly=e=>e?.message==='NOTICE_REQUIRED'?'Reserva con al menos '+(B.policy?.minimumNoticeMinutes||120)+' minutos de antelación.':errors[e?.message]||'No se ha podido completar la operación. Inténtalo de nuevo.';B.friendly=friendly;
+ const errors={REVISION_CONFLICT:'Otra persona ha guardado cambios. Recarga antes de editar.',NO_AVAILABILITY:'No queda una mesa para ese horario.',NOTICE_REQUIRED:'Reserva con al menos 1 hora de antelación.',OUTSIDE_OPENING_HOURS:'Elige una llegada entre las 12:30 y las 21:30 en un día de apertura.',DEPOSIT_REQUIRED:'Esta reserva requiere anticipo. Los pagos online aún no están activados; contacta con el restaurante.',CONFIGURATION_REQUIRED:'Las reservas aún no están activadas.',INVALID_ACTION:'Esta reserva ya no admite ese cambio.',FORBIDDEN:'No tienes permiso para acceder.',BOT_CHECK_FAILED:'Repite la comprobación de seguridad.',TRY_LATER:'Demasiados intentos. Espera unos minutos.',INVALID_INPUT:'Revisa los datos del formulario.'};
+ const friendly=e=>e?.message==='NOTICE_REQUIRED'?'Reserva con al menos '+(B.policy?.minimumNoticeMinutes||60)+' minutos de antelación.':errors[e?.message]||'No se ha podido completar la operación. Inténtalo de nuevo.';B.friendly=friendly;
  async function api(path,body,method='POST',staff=false){
   if(!B.config)throw Error('CONFIGURATION_REQUIRED');
   const r=await fetch(B.config.supabaseUrl+path,{method,headers:{apikey:B.config.publishableKey,...(staff?{Authorization:'Bearer '+B.token}:{}),...(body===undefined?{}:{'Content-Type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(20000)});
@@ -65,7 +65,7 @@
  B.cancel=async id=>{await api('/rest/v1/rpc/staff_cancel_booking',{p_id:id},'POST',true);await B.refreshBookings()};
  async function operationControls(){
   const host=document.querySelector('#bookings');const settings=document.createElement('form');settings.className='surface';
-  settings.innerHTML='<h3>Reglas de las mesas</h3><label>Antelación mínima (minutos)<input name="notice" type="number" min="120" max="10080" required></label><label>Duración de la mesa (minutos)<input name="duration" type="number" min="30" max="360" required></label><button type="submit">Guardar reglas</button><p role="status"></p>';
+  settings.innerHTML='<h3>Reglas de las mesas</h3><label>Antelación mínima (minutos)<input name="notice" type="number" min="60" max="10080" required></label><label>Duración de la mesa (minutos)<input name="duration" type="number" min="30" max="360" required></label><button type="submit">Guardar reglas</button><p role="status"></p>';
   const config=(await api('/rest/v1/restaurant_settings?select=minimum_notice_minutes,meal_duration_minutes&id=eq.true',undefined,'GET',true))[0];settings.elements.notice.value=config.minimum_notice_minutes;settings.elements.duration.value=config.meal_duration_minutes;host.append(settings);
   settings.onsubmit=async e=>{e.preventDefault();const message=settings.querySelector('[role=status]'),button=settings.querySelector('button');button.disabled=true;try{await api('/rest/v1/restaurant_settings?id=eq.true',{minimum_notice_minutes:Number(settings.elements.notice.value),meal_duration_minutes:Number(settings.elements.duration.value)},'PATCH',true);message.textContent='Reglas actualizadas. Se aplicarán a las nuevas reservas y cambios.'}catch(e){message.textContent=friendly(e)}finally{button.disabled=false}};
   const delivery=document.createElement('section');delivery.className='surface';host.append(delivery);
@@ -92,4 +92,3 @@
   setInterval(()=>{if(!document.hidden)B.refreshBookings().catch(()=>{document.querySelector('#save-state').textContent='No se han podido actualizar las reservas.'})},15000);
  }).catch(e=>{document.querySelector('#save-state').textContent=friendly(e);document.querySelectorAll('main button').forEach(b=>b.disabled=true)});
 })();
-

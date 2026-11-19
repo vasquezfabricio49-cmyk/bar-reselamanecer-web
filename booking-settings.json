@@ -1,7 +1,7 @@
 {
   "restaurantName": "Restaurante El Amanecer",
   "timezone": "Europe/Madrid",
-  "minimumNoticeMinutes": 120,
+  "minimumNoticeMinutes": 60,
   "confirmationMode": "automatic_if_available",
   "productionEnabled": false,
   "openingHours": [
@@ -135,9 +135,9 @@
   ],
   "mealDurationMinutes": 120,
   "pending": [
-    "Conectar base de datos privada y avisos",
-    "Confirmar máximo de personas por reserva",
-    "Conectar panel compartido, cancelaciones, cambios y avisos a ambas partes"
+    "Activar servicios externos y verificar correos",
+    "Configurar cobros de anticipos y confirmar devoluciones",
+    "Verificar asignación de varias mesas en Supabase"
   ],
   "holidays": {
     "open": true,
@@ -154,6 +154,43 @@
   "eventLayout": {
     "tables": 8,
     "bookingMode": "contact_restaurant"
+  },
+  "minimumPeople": 2,
+  "maximumPeople": 20,
+  "kitchenHours": {
+    "opens": "12:30",
+    "lastArrival": "21:30",
+    "closedWeekdays": [
+      3
+    ],
+    "arrivalAtClosingAllowed": true
+  },
+  "cancellation": {
+    "allowed": true,
+    "recommendedNoticeMinutes": 30,
+    "hardDeadline": false
+  },
+  "deposit": {
+    "enabled": false,
+    "currency": "EUR",
+    "perReservation": true,
+    "tiers": [
+      {
+        "minimumPeople": 2,
+        "maximumPeople": 9,
+        "amount": 0
+      },
+      {
+        "minimumPeople": 10,
+        "maximumPeople": 15,
+        "amount": 30
+      },
+      {
+        "minimumPeople": 16,
+        "maximumPeople": 20,
+        "amount": 50
+      }
+    ],
+    "refundPolicyConfirmed": false
   }
 }
-

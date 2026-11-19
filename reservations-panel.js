@@ -23,4 +23,3 @@
  addEventListener('amanecer:bookings-change',()=>load(true));addEventListener('amanecer:panel-change',()=>load(true));addEventListener('focus',()=>load());
  load(true);
 })();
-

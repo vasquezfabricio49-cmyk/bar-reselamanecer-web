@@ -1,0 +1,12 @@
+:root{--daily-paper:#f4eadb;--daily-ink:#38271e;--daily-rule:#c49d6866;--daily-accent:#713422}
+[hidden]{display:none!important}
+.drink-formats{display:block;font:400 13px/1.5 Interface,Arial,sans-serif;color:inherit;margin-top:6px}
+.daily-menu{background:var(--daily-paper);color:var(--daily-ink)}
+.daily-menu .section-head{margin-bottom:32px}.daily-menu .section-head p{color:var(--daily-ink)}
+.daily-menu h2{color:var(--daily-ink)}#daily-date{font-size:15px;margin:16px 0 0;text-transform:capitalize}#daily-price{font-size:24px}
+.daily-products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 32px}
+.daily-products article{display:flex;align-items:center;gap:20px;border-top:1px solid var(--daily-rule);padding:24px 0;min-width:0}
+.daily-products img{width:120px;height:90px;object-fit:cover;border-radius:3px;flex:none}.daily-products h3{font-size:28px;margin:0 0 8px}.daily-products p{font-size:15px;line-height:1.5;margin:0}
+.daily-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:20px 0}.daily-choices label{display:flex!important;align-items:center;gap:12px;min-height:48px;padding:12px;border:1px solid var(--daily-rule);border-radius:4px;margin:0!important}.daily-choices input[type=checkbox],#daily-form>label>input[type=checkbox]{width:20px;min-height:20px;height:20px;flex:none;margin:0}.daily-choices label:has(input:checked){background:var(--daily-paper);color:var(--daily-ink);border-color:var(--daily-accent)}#daily-form>label{display:block;margin:20px 0}#daily-form input:not([type=checkbox]),#daily-form textarea{width:100%;min-height:44px;font:inherit;padding:12px}.kitchen-hours,.booking-policy-summary{font-size:15px;line-height:1.7}.booking-policy-summary{padding-bottom:20px;border-bottom:1px solid var(--daily-rule);color:var(--daily-ink)}
+@media(max-width:760px){.daily-products,.daily-choices{grid-template-columns:minmax(0,1fr)}.daily-products article{gap:16px}.daily-products img{width:96px;height:80px}.daily-products h3{font-size:25px}.daily-products p{font-size:14px}.daily-menu .section-head{display:block}.kitchen-hours{margin-top:24px}}
+@media(prefers-reduced-motion:reduce){.daily-products *{transition:none}}
