@@ -1,0 +1,159 @@
+{
+  "restaurantName": "Restaurante El Amanecer",
+  "timezone": "Europe/Madrid",
+  "minimumNoticeMinutes": 120,
+  "confirmationMode": "automatic_if_available",
+  "productionEnabled": false,
+  "openingHours": [
+    {
+      "weekday": 1,
+      "label": "Lunes",
+      "opens": "10:00",
+      "closes": "22:00",
+      "closesNextDay": false
+    },
+    {
+      "weekday": 2,
+      "label": "Martes",
+      "opens": "10:00",
+      "closes": "18:00",
+      "closesNextDay": false
+    },
+    {
+      "weekday": 3,
+      "label": "Miércoles",
+      "closed": true
+    },
+    {
+      "weekday": 4,
+      "label": "Jueves",
+      "opens": "10:00",
+      "closes": "22:00",
+      "closesNextDay": false
+    },
+    {
+      "weekday": 5,
+      "label": "Viernes",
+      "opens": "09:00",
+      "closes": "02:30",
+      "closesNextDay": true
+    },
+    {
+      "weekday": 6,
+      "label": "Sábado",
+      "opens": "09:00",
+      "closes": "02:30",
+      "closesNextDay": true
+    },
+    {
+      "weekday": 0,
+      "label": "Domingo",
+      "opens": "09:00",
+      "closes": "22:00",
+      "closesNextDay": false
+    }
+  ],
+  "tables": [
+    {
+      "label": "Mesa 01",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 02",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 03",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 04",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 05",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 06",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 07",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 08",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 09",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 10",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 11",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 12",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    },
+    {
+      "label": "Mesa 13",
+      "capacity": 6,
+      "minimumPeople": 2,
+      "active": true
+    }
+  ],
+  "mealDurationMinutes": 120,
+  "pending": [
+    "Conectar base de datos privada y avisos",
+    "Confirmar máximo de personas por reserva",
+    "Conectar panel compartido, cancelaciones, cambios y avisos a ambas partes"
+  ],
+  "holidays": {
+    "open": true,
+    "followWeeklyHours": true,
+    "wednesdayClosed": true
+  },
+  "capacityProposal": {
+    "diningTables": 13,
+    "eventLayoutTables": 8,
+    "minimumPeoplePerTable": 2,
+    "maximumPeoplePerTable": 6,
+    "needsLayoutConfirmation": false
+  },
+  "eventLayout": {
+    "tables": 8,
+    "bookingMode": "contact_restaurant"
+  }
+}
+
