@@ -84,7 +84,7 @@
   document.querySelector('#customers .section-heading p').textContent='Contactos de las reservas del restaurante.';
   document.querySelector('#content .section-heading p').textContent='Los cambios guardados se publican para todos los visitantes.';
   document.querySelector('.publish-instructions').hidden=true;document.querySelector('.quick [data-go=bookings] span').textContent='Consulta y gestiona las reservas compartidas.';
-  document.querySelector('.backup>p').textContent='Exporta una copia de carta, textos y multimedia. Las reservas se protegen con las copias del servicio de base de datos.';
+  document.querySelector('.backup>p').textContent='Exporta una copia de carta, textos y multimedia. Las copias de la base de datos se gestionan en Supabase según el plan contratado.';
   document.querySelector('.backup>a').hidden=true;
   document.querySelector('#export').textContent='Exportar copia del contenido';
   document.querySelector('#export-content').textContent='Exportar textos y multimedia';
