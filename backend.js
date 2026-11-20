@@ -9,7 +9,7 @@
   if(!B.config)throw Error('CONFIGURATION_REQUIRED');
   const r=await fetch(B.config.supabaseUrl+path,{method,headers:{apikey:B.config.publishableKey,...(staff?{Authorization:'Bearer '+B.token}:{}),...(body===undefined?{}:{'Content-Type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(20000)});
   const text=await r.text();let data;try{data=text?JSON.parse(text):null}catch{throw Error('SERVICE_UNAVAILABLE')}
-  if(!r.ok)throw Error(data?.error||data?.message||'SERVICE_UNAVAILABLE');return data;
+  if(!r.ok)throw Error(data?.error_code||(errors[data?.code]?data.code:null)||data?.error||data?.message||'SERVICE_UNAVAILABLE');return data;
  }
  B.api=api;
  B.ready=fetch('connection.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('SERVICE_UNAVAILABLE');return r.json()}).then(c=>{
@@ -26,19 +26,23 @@
  async function login(){if(authPromise)return authPromise;
   authPromise=new Promise(resolve=>{
    const dialog=document.createElement('dialog');dialog.className='connection-login';dialog.setAttribute('aria-labelledby','login-title');
-   dialog.innerHTML='<form><h2 id="login-title">Tu restaurante, en un solo lugar.</h2><p>Accede con el correo autorizado de administración.</p><label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label><label hidden>Código del correo<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}"></label><button type="submit">Recibir código de acceso</button><p role="status"></p></form>';
+   dialog.innerHTML='<form><h2 id="login-title">Tu restaurante, en un solo lugar.</h2><p>Accede con tu correo y contraseña.</p><label>Correo electrónico<input name="email" type="email" autocomplete="username" required></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label><label hidden>Código del correo<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}"></label><button type="submit">Entrar al panel</button><button type="button" class="password-help">Primer acceso o recuperar contraseña</button><p role="status"></p></form>';
    document.body.append(dialog);dialog.showModal();dialog.addEventListener('cancel',e=>e.preventDefault());
-   const form=dialog.querySelector('form'),status=form.querySelector('[role=status]'),button=form.querySelector('button');let sent=false;
+   const form=dialog.querySelector('form'),status=form.querySelector('[role=status]'),button=form.querySelector('[type=submit]'),help=form.querySelector('.password-help');let mode='password';
+   help.onclick=()=>{mode='request';form.elements.password.required=false;form.elements.password.value='';form.elements.password.parentElement.hidden=true;help.hidden=true;button.textContent='Recibir código de recuperación';status.textContent='Solo se enviará un correo para establecer o recuperar tu contraseña.'};
+   Object.assign(errors,{invalid_credentials:'El correo o la contraseña no son correctos.',otp_expired:'El código ha caducado. Recarga y solicita uno nuevo.',same_password:'Elige una contraseña diferente.',weak_password:'La contraseña no cumple los requisitos de seguridad.',over_email_send_rate_limit:'Espera unos minutos antes de pedir otro código.'});
    form.onsubmit=async e=>{e.preventDefault();button.disabled=true;try{
     const email=form.elements.email.value.trim();
-    if(!sent){await api('/auth/v1/otp',{email,create_user:false});sent=true;form.elements.email.readOnly=true;form.elements.code.parentElement.hidden=false;form.elements.code.required=true;button.textContent='Entrar al panel';status.textContent='Introduce el código que has recibido por correo.';form.elements.code.focus()}
-    else{const session=await api('/auth/v1/verify',{email,token:form.elements.code.value.trim(),type:'email'});B.token=session.access_token;
+    if(mode==='request'){await api('/auth/v1/otp',{email,create_user:false});mode='code';form.elements.email.readOnly=true;form.elements.code.parentElement.hidden=false;form.elements.code.required=true;button.textContent='Verificar código';status.textContent='Introduce el código que has recibido por correo.';form.elements.code.focus();return}
+    if(mode==='set'){const value=form.elements.password.value;if(value!==form.elements.passwordConfirm.value){status.textContent='Las contraseñas no coinciden.';return}await api('/auth/v1/user',{password:value},'PUT',true);form.elements.password.value='';form.elements.passwordConfirm.value='';dialog.close();dialog.remove();resolve();return}
+    {const session=mode==='code'?await api('/auth/v1/verify',{email,token:form.elements.code.value.trim(),type:'email'}):await api('/auth/v1/token?grant_type=password',{email,password:form.elements.password.value});B.token=session.access_token;
      const staff=await api('/rest/v1/restaurant_staff?select=user_id',undefined,'GET',true);if(!staff?.length){B.token='';throw Error('FORBIDDEN')}
-     dialog.close();dialog.remove();resolve();
+     form.elements.password.value='';
+     if(mode==='code'){mode='set';form.elements.code.value='';form.elements.code.required=false;form.elements.code.parentElement.hidden=true;form.elements.password.parentElement.hidden=false;form.elements.password.required=true;form.elements.password.autocomplete='new-password';form.elements.password.minLength=10;const label=document.createElement('label');label.textContent='Repite la contraseña';const confirmation=document.createElement('input');confirmation.name='passwordConfirm';confirmation.type='password';confirmation.autocomplete='new-password';confirmation.minLength=10;confirmation.required=true;label.append(confirmation);button.before(label);button.textContent='Guardar contraseña y entrar';status.textContent='Introduce tu nueva contraseña. Se guardará de forma protegida en el servicio de acceso.';form.elements.password.focus()}else{dialog.close();dialog.remove();resolve()}
      setTimeout(()=>{B.token='';location.reload()},Math.max(60000,((session.expires_in||3600)-30)*1000));
      const logout=document.createElement('button');logout.textContent='Cerrar sesión';logout.onclick=()=>{B.token='';location.reload()};document.querySelector('.sidebar')?.append(logout);
     }
-   }catch(e){B.token='';status.textContent=friendly(e)}finally{button.disabled=false}};
+   }catch(e){if(mode!=='set')B.token='';status.textContent=friendly(e)}finally{button.disabled=false}};
   });return authPromise;
  }
  B.loadSite=async(force=false)=>{await B.ready;if(!B.enabled)return null;if(editor)await login();if(loadPromise&&!force)return loadPromise;
