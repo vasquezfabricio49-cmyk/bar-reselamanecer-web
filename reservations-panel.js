@@ -12,7 +12,14 @@
    const select=document.createElement('select');select.setAttribute('aria-label','Estado local de solicitud de '+item.name);
    for(const [value,label] of Object.entries(statuses)){if(window.AmanecerBackend?.enabled&&value!==item.status&&value!=='cancelled')continue;const option=new Option(label,value);option.selected=value===item.status;select.append(option)}
    select.onchange=async()=>{select.disabled=true;try{await CMS.setBookingStatus(item.reference,select.value);$('#save-state').textContent=window.AmanecerBackend?.enabled?'● Reserva actualizada':'● Estado guardado en este navegador'}catch(error){select.value=item.status;$('#save-state').textContent=error.message}finally{select.disabled=false}};
-   row.append(info,select);bookings.append(row);
+   if(window.AmanecerBackend?.enabled){
+    const actions=document.createElement('div');actions.className='booking-actions';
+    const state=document.createElement('p');state.textContent=item.cancellationReason==='no_show'?'No presentado':item.status==='cancelled'?'Cancelada':'Confirmada';actions.append(state);
+    if(item.status==='confirmed'){
+     const cancel=document.createElement('button');cancel.type='button';cancel.textContent='El restaurante no puede atender';cancel.onclick=async()=>{if(!confirm('El restaurante no puede prestar el servicio: se cancelará la mesa y se devolverá íntegramente el anticipo, si existe. ¿Confirmar?'))return;cancel.disabled=true;try{await window.AmanecerBackend.cancel(item.reference)}catch(e){$('#save-state').textContent=window.AmanecerBackend.friendly(e);cancel.disabled=false}};
+     const absent=document.createElement('button');absent.type='button';absent.textContent='No presentado · sin devolución';absent.onclick=async()=>{if(!confirm('Marca esta opción solo si ya ha pasado la hora reservada y el cliente no ha acudido. Se libera la mesa y se conserva el anticipo. ¿Confirmar?'))return;absent.disabled=true;try{await window.AmanecerBackend.noShow(item.reference)}catch(e){$('#save-state').textContent=window.AmanecerBackend.friendly(e);absent.disabled=false}};actions.append(cancel,absent);
+    }row.append(info,actions);
+   }else row.append(info,select);bookings.append(row);
   }
   const people=new Map();for(const r of rows){const key=r.phone.replace(/\D/g,'');if(!people.has(key))people.set(key,{name:r.name,phone:r.phone,count:0,last:r.date});people.get(key).count++}
   for(const person of people.values()){const row=document.createElement('article'),info=document.createElement('div'),h=document.createElement('h3'),p=document.createElement('p');row.className='record';h.textContent=person.name;p.textContent=`${person.phone}\n${person.count} solicitud${person.count===1?'':'es'} local${person.count===1?'':'es'} · Última fecha: ${day(person.last)}`;info.append(h,p);row.append(info);customers.append(row)}

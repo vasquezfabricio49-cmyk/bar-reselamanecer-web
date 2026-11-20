@@ -1,6 +1,6 @@
 {
-  "enabled": false,
-  "supabaseUrl": "",
-  "publishableKey": "",
-  "turnstileSiteKey": ""
+  "enabled": true,
+  "supabaseUrl": "https://kchukrfxumenapapvzew.supabase.co",
+  "publishableKey": "sb_publishable_pEC1495zTS_a2L3vE-FoGA_w-p6hgXl",
+  "turnstileSiteKey": "0x4AAAAAAGKdfYDwuN5DWDBi"
 }

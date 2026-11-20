@@ -14,13 +14,13 @@
  B.api=api;
  B.ready=fetch('connection.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('SERVICE_UNAVAILABLE');return r.json()}).then(c=>{
   if(c.enabled!==true)return;
-  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(c.supabaseUrl)||typeof c.publishableKey!=='string'||!c.publishableKey||!c.turnstileSiteKey)throw Error('CONFIGURATION_REQUIRED');
+  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(c.supabaseUrl)||typeof c.publishableKey!=='string'||!c.publishableKey)throw Error('CONFIGURATION_REQUIRED');
   if(c.publishableKey.startsWith('sb_secret_'))throw Error('CONFIGURATION_REQUIRED');
   if(c.publishableKey.startsWith('eyJ')){try{const claim=JSON.parse(atob(c.publishableKey.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));if(claim.role!=='anon')throw Error()}catch{throw Error('CONFIGURATION_REQUIRED')}}
   B.config=c;B.enabled=true;
  });
  B.ready.catch(()=>{});
- B.policyReady=B.ready.then(async()=>{if(!B.enabled)return;B.policy=await api('/rest/v1/rpc/read_booking_policy',{});if(window.AmanecerBookingRules)window.AmanecerBookingRules.minimumNoticeMinutes=B.policy.minimumNoticeMinutes;return B.policy});
+ B.policyReady=B.ready.then(async()=>{if(!B.enabled)return;B.policy=await api('/rest/v1/rpc/read_booking_policy',{});if(B.policy.enabled&&!B.config.turnstileSiteKey)throw Error('CONFIGURATION_REQUIRED');if(window.AmanecerBookingRules)window.AmanecerBookingRules.minimumNoticeMinutes=B.policy.minimumNoticeMinutes;return B.policy});
  B.policyReady.catch(()=>{});
  let authPromise,loadPromise;
  async function login(){if(authPromise)return authPromise;
@@ -59,11 +59,12 @@
  };
  B.refreshBookings=async()=>{
   await B.loadSite();if(!B.enabled)return;
-  const rows=await api('/rest/v1/reservations?select=id,customer_name,phone,email,people,starts_at,status&order=starts_at.desc&limit=500',undefined,'GET',true);
-  B.bookings=rows.map(r=>{const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(r.starts_at)).map(x=>[x.type,x.value]));return {reference:r.id,name:r.customer_name,phone:r.phone,email:r.email,people:r.people,date:p.year+'-'+p.month+'-'+p.day,time:p.hour+':'+p.minute,status:r.status}});
+  const rows=await api('/rest/v1/reservations?select=id,customer_name,phone,email,people,starts_at,status,cancellation_reason&order=starts_at.desc&limit=500',undefined,'GET',true);
+  B.bookings=rows.map(r=>{const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(r.starts_at)).map(x=>[x.type,x.value]));return {reference:r.id,name:r.customer_name,phone:r.phone,email:r.email,people:r.people,date:p.year+'-'+p.month+'-'+p.day,time:p.hour+':'+p.minute,status:r.status,cancellationReason:r.cancellation_reason}});
   dispatchEvent(new Event('amanecer:bookings-change'));
  };
- B.cancel=async id=>{await api('/rest/v1/rpc/staff_cancel_booking',{p_id:id},'POST',true);await B.refreshBookings()};
+ B.cancel=async id=>{await api('/rest/v1/rpc/staff_cancel_service_booking',{p_id:id},'POST',true);await B.refreshBookings()};
+ B.noShow=async id=>{await api('/rest/v1/rpc/staff_mark_no_show',{p_id:id},'POST',true);await B.refreshBookings()};
  async function operationControls(){
   const host=document.querySelector('#bookings');const settings=document.createElement('form');settings.className='surface';
   settings.innerHTML='<h3>Reglas de las mesas</h3><label>Antelación mínima (minutos)<input name="notice" type="number" min="60" max="10080" required></label><label>Duración de la mesa (minutos)<input name="duration" type="number" min="30" max="360" required></label><button type="submit">Guardar reglas</button><p role="status"></p>';
